@@ -12,8 +12,8 @@ import java.util.UUID;
 @Service
 public class FileUploadService {
 
-    private static final String SAVE_PATH = "/Capstone/cloud"; // Server
-    //private static final String SAVE_PATH = "/Users/giyeon/testCloud"; // localhost
+    //private static final String SAVE_PATH = "/Capstone/cloud"; // Server
+    private static final String SAVE_PATH = "/Users/giyeon/testCloud"; // localhost
 
     public String restore(MultipartHttpServletRequest request) {
         String url = null;
@@ -39,8 +39,7 @@ public class FileUploadService {
 
     private String saveFileName(String extName) {
         Calendar calendar = Calendar.getInstance();
-        return calendar.get(Calendar.MONDAY)+calendar.get(Calendar.DATE)+calendar.get(Calendar.HOUR)+
-                "_"+"_"+UUID.randomUUID().toString();
+        return UUID.randomUUID().toString();
     }
 
     public String uploadResult() {

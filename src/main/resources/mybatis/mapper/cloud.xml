@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.server.cloud.mapper.DBMapper">
+
+    <select id="returnFileList" parameterType="com.spring.server.cloud.dto.FileManager">
+        SELECT * FROM file WHERE file_name
+        NOT IN
+        <foreach collection="list" item="pid"  open="(" close=")" separator=",">
+          #{pid}
+        </foreach>
+        <!--FILE 문 조회문 DB  SELECT * FROM file_tb WHERE filename Not IN ( #{saveName} )-->
+        <!--  local folder에 있는 filename은 한번에 보내줄텐데 이를 한번에 검색하고 제외하여 조회할 수 있는가?-->
+
+    </select>
+    <select id="findByUserId" parameterType="String" resultType="com.spring.server.db.dto.User">
+        SELECT * FROM user WHERE id = #{id}
+    </select>
+
+    <select id="userLogin" parameterType="String" resultType="com.spring.server.db.dto.User">
+        SELECT * FROM user WHERE id = #{id} and password = #{pw}
+    </select>
+
+    <insert id="signUpUser" parameterType="com.spring.server.db.dto.User">
+        INSERT into user
+        VALUES(#{name},#{id},#{password})
+    </insert>
+</mapper>

@@ -6,17 +6,16 @@
     </select>
 
     <select id="findByUserId" parameterType="String" resultType="com.spring.server.db.dto.User">
-        SELECT * FROM user WHERE id = #{id}
+        SELECT * FROM user WHERE ID = #{id}
     </select>
 
     <select id="userLogin" parameterType="String" resultType="com.spring.server.db.dto.User">
-        SELECT * FROM user WHERE id = #{id} and password = #{pw}
+        SELECT * FROM user WHERE ID = #{id} and PW = #{pw}
     </select>
 
     <insert id="signUpUser" parameterType="com.spring.server.db.dto.User">
         INSERT into user
         VALUES(#{name},#{id},#{password})
     </insert>
-
 </mapper>
 

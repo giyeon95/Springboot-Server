@@ -6,12 +6,14 @@ public class User {
     private String name;
     private String id;
     private String password;
+    private String email;
 
 
-    public void pushUser(String name, String id, String pw) {
+    public void pushUser(String name, String id, String pw, String email) {
         this.name = name;
         this.id = id;
         this.password = pw;
+        this.email = email;
     }
 
     public String getName() {
@@ -38,4 +40,9 @@ public class User {
         this.password = password;
     }
 
+    public String getEmail() { return email; }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

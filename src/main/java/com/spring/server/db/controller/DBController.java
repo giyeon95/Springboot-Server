@@ -1,6 +1,7 @@
 package com.spring.server.db.controller;
 
 import com.spring.server.db.dto.User;
+import com.spring.server.db.dto.UserEmail;
 import com.spring.server.db.service.DBService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,6 +39,11 @@ public class DBController {
     @RequestMapping("/addUser")
     public @ResponseBody int addUser(HttpServletRequest request) throws Exception {
        return dbService.signUpUser(request);
+    }
+
+    @RequestMapping("/approvalUserRoom")
+    public @ResponseBody List<UserEmail> approvalUserRoom(HttpServletRequest request) throws Exception {
+        return dbService.approvalUserRoom(request);
     }
 
 }

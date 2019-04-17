@@ -2,7 +2,9 @@ package com.spring.server.db.service;
 
 import com.google.gson.JsonIOException;
 import com.spring.server.db.dto.User;
+import com.spring.server.db.dto.UserEmail;
 import com.spring.server.db.mapper.DBMapper;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,44 +40,72 @@ public class DBService {
 
     public int signUpUser(HttpServletRequest request) throws Exception {
 
-        StringBuffer json = new StringBuffer();
-        String line = null;
-
-        try {
-            BufferedReader reader = request.getReader();
-            while((line = reader.readLine()) != null) {
-                json.append(line);
-            }
-
-        }catch(Exception e) {
-            System.out.println("Error reading JSON string: " + e.toString());
-        }
-
-
-        String name,id,password;
         User user = new User();
 
+        StringBuffer json = createJson(request);
+        try {
 
-       try {
             JSONParser parser = new JSONParser();
             JSONObject jsonObject = (JSONObject)parser.parse(json.toString());
 
             JSONObject jsonObjectData = (JSONObject)jsonObject.get("data");
 
+            user.pushUser(jsonObjectData.get("name").toString(),
+                    jsonObjectData.get("id").toString(),
+                    jsonObjectData.get("password").toString(),
+                    jsonObjectData.get("email").toString());
 
-            name  = jsonObjectData.get("name").toString();
-            id = jsonObjectData.get("id").toString();
-            password = jsonObjectData.get("password").toString();
-
-            user.pushUser(name,id,password);
-
-        } catch(JsonIOException e) {
+        }catch(Exception e) {
             e.printStackTrace();
         }
 
         return dbMapper.signUpUser(user);
     }
 
+    public List<UserEmail> approvalUserRoom (HttpServletRequest request) throws Exception {
+
+        UserEmail userEmail = new UserEmail();
+
+        StringBuffer json = createJson(request);
+        String roomId="" , userId;
+
+        try {
+            JSONParser parser = new JSONParser();
+            JSONObject jsonObject = (JSONObject)parser.parse(json.toString());
+
+            roomId = jsonObject.get("roomID").toString();
+
+            JSONArray jsonArray = (JSONArray)jsonObject.get("approvalUser");
+
+            for(int i = 0 ; i < Integer.parseInt(jsonObject.get("count").toString()) ; i++) {
+                dbMapper.addUserRoom(roomId, jsonArray.get(i).toString());
+            }
+
+
+
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+
+
+
+        return dbMapper.emailReturn(roomId);
+    }
+
+    private StringBuffer createJson(HttpServletRequest request) {
+        String line = null;
+        StringBuffer json = new StringBuffer();
+        try {
+            BufferedReader reader = request.getReader();
+            while((line = reader.readLine()) != null) {
+                json.append(line);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return json;
+    }
 
 
 }

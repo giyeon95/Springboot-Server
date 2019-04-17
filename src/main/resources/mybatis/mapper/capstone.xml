@@ -14,8 +14,16 @@
     </select>
 
     <insert id="signUpUser" parameterType="com.spring.server.db.dto.User">
-        INSERT into user
-        VALUES(#{id},#{password},#{name})
+        INSERT INTO user
+        VALUES(#{id},#{password},#{name},#{email})
     </insert>
+
+    <insert id="addUserRoom" parameterType="String">
+        INSERT INTO roomUser VALUES (#{roomId}, #{userId});
+    </insert>
+
+    <select id="emailReturn" parameterType="String" resultType="com.spring.server.db.dto.UserEmail">
+        SELECT Name, Email FROM user WHERE ID IN (SELECT User FROM roomUser WHERE ID = #{roomId});
+    </select>
 </mapper>
 

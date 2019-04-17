@@ -1,6 +1,7 @@
 package com.spring.server.cloud;
 
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -9,11 +10,10 @@ import org.springframework.web.multipart.support.MultipartFilter;
 
 
 
+@MapperScan(basePackages = "com.spring.server.cloud.mapper")
 
 @Component
 public class CloudConfig {
-
-
 
     @Bean
     public MultipartResolver multipartResolver() {
@@ -21,7 +21,6 @@ public class CloudConfig {
         multipartResolver.setMaxUploadSize(200000000); //20MB
         return multipartResolver;
     }
-
 
     @Bean
     public FilterRegistrationBean multipartFilterRegistrationBean() throws Exception {

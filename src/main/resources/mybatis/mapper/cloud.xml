@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.spring.server.cloud.mapper.DBMapper">
+<mapper namespace="com.spring.server.cloud.mapper.CloudDBMapper">
+
+    <insert id="restoreDatabase" parameterType="com.spring.server.cloud.dto.FileManager">
+        INSERT INTO file VALUES (#{roomId}, #{userId},#{lastWriteTime},#{saveFileName},#{fileLength},#{extension});
+    </insert>
+
+    <select id="checkFileTime" parameterType="String"  resultType="String">
+      SELECT Time FROM file WHERE ID = #{roomId} AND User = #{userId} AND FileName = #{fileName};
+    </select>
+
+    <update id="updateFileTime" parameterType="com.spring.server.cloud.dto.FileManager">
+        UPDATE file SET
+          User = #{userId},
+          Time = #{lastWriteTime},
+          FileSize = #{fileLength},
+          Extension = #{extension}
+        WHERE ID = #{roomId} AND FileName = #{saveFileName};
+    </update>
 
     <select id="returnFileList" parameterType="com.spring.server.cloud.dto.FileManager">
         SELECT * FROM file WHERE file_name
@@ -12,16 +29,5 @@
         <!--  local folder에 있는 filename은 한번에 보내줄텐데 이를 한번에 검색하고 제외하여 조회할 수 있는가?-->
 
     </select>
-    <select id="findByUserId" parameterType="String" resultType="com.spring.server.db.dto.User">
-        SELECT * FROM user WHERE id = #{id}
-    </select>
 
-    <select id="userLogin" parameterType="String" resultType="com.spring.server.db.dto.User">
-        SELECT * FROM user WHERE id = #{id} and password = #{pw}
-    </select>
-
-    <insert id="signUpUser" parameterType="com.spring.server.db.dto.User">
-        INSERT into user
-        VALUES(#{name},#{id},#{password})
-    </insert>
 </mapper>

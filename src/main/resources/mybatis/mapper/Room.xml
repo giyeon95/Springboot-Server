@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.server.cloud.mapper.RoomDBMapper">
+
+    <insert id="createRoom" parameterType="String">
+        INSERT into room
+        VALUES(#{roomId},#{roomPw});
+    </insert>
+
+    <select id="getAll" parameterType="String" resultType="com.spring.server.cloud.dto.UserIdName">
+        SELECT ID, Name
+        FROM user
+        WHERE ID NOT IN(#{userId});
+    </select>
+
+    <select id="searchUserName" parameterType="String" resultType="com.spring.server.cloud.dto.UserIdName">
+        SELECT ID, Name
+        FROM user
+        WHERE ID NOT IN(#{userId}) AND NAME LIKE #{word};
+    </select>
+
+    <select id="roomListCheck" parameterType="String" resultType="String">
+        SELECT ID
+        FROM room
+        WHERE ID = #{roomId};
+    </select>
+</mapper>

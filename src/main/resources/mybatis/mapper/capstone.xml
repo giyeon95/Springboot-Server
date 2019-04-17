@@ -15,7 +15,7 @@
 
     <insert id="signUpUser" parameterType="com.spring.server.db.dto.User">
         INSERT into user
-        VALUES(#{name},#{id},#{password})
+        VALUES(#{id},#{password},#{name})
     </insert>
 </mapper>
 

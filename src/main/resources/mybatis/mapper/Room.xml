@@ -4,24 +4,46 @@
 
     <insert id="createRoom" parameterType="String">
         INSERT into room
-        VALUES(#{roomId},#{roomPw});
+        VALUES(#{roomId},#{roomPw},#{userId})
     </insert>
 
     <select id="getAll" parameterType="String" resultType="com.spring.server.cloud.dto.UserIdName">
         SELECT ID, Name
         FROM user
-        WHERE ID NOT IN(#{userId});
+        WHERE ID NOT IN(#{userId})
     </select>
 
     <select id="searchUserName" parameterType="String" resultType="com.spring.server.cloud.dto.UserIdName">
         SELECT ID, Name
         FROM user
-        WHERE ID NOT IN(#{userId}) AND NAME LIKE #{word};
+        WHERE ID NOT IN(#{userId}) AND NAME LIKE #{word}
     </select>
 
     <select id="roomListCheck" parameterType="String" resultType="String">
         SELECT ID
         FROM room
-        WHERE ID = #{roomId};
+        WHERE ID = #{roomId}
     </select>
+
+    <select id="roomEnter" parameterType="String" resultType="int">
+        SELECT COUNT(*) FROM room WHERE ID = #{roomId} AND PW = #{roomPw}
+    </select>
+
+    <select id="eachUserRoomList" parameterType="String" resultType="Map">
+        SELECT ID AS roomId,
+          (
+            SELECT COUNT(*)
+            FROM roomUser
+            WHERE ID = roomId
+          ) AS roomCount,
+            (
+                SELECT Admin
+                FROM room
+                WHERE ID = roomId
+            ) AS Admin
+
+        FROM roomUser WHERE User = #{userId} AND ID LIKE #{word};
+    </select>
+
+
 </mapper>

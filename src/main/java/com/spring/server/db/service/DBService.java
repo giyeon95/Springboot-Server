@@ -1,6 +1,7 @@
 package com.spring.server.db.service;
 
 import com.google.gson.JsonIOException;
+import com.spring.server.Common;
 import com.spring.server.db.dto.User;
 import com.spring.server.db.dto.UserEmail;
 import com.spring.server.db.mapper.DBMapper;
@@ -42,7 +43,7 @@ public class DBService {
 
         User user = new User();
 
-        StringBuffer json = createJson(request);
+        StringBuffer json = Common.getInstance().createJson(request);
         try {
 
             JSONParser parser = new JSONParser();
@@ -66,7 +67,7 @@ public class DBService {
 
         UserEmail userEmail = new UserEmail();
 
-        StringBuffer json = createJson(request);
+        StringBuffer json = Common.getInstance().createJson(request);
         String roomId="" , userId;
 
         try {
@@ -92,20 +93,6 @@ public class DBService {
         return dbMapper.emailReturn(roomId);
     }
 
-    private StringBuffer createJson(HttpServletRequest request) {
-        String line = null;
-        StringBuffer json = new StringBuffer();
-        try {
-            BufferedReader reader = request.getReader();
-            while((line = reader.readLine()) != null) {
-                json.append(line);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return json;
-    }
 
 
 }

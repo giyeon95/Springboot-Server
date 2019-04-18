@@ -7,7 +7,7 @@
     </insert>
 
     <select id="checkFileTime" parameterType="String"  resultType="String">
-      SELECT Time FROM file WHERE ID = #{roomId} AND User = #{userId} AND FileName = #{fileName};
+      SELECT Time FROM file WHERE ID = #{roomId} AND FileName = #{fileName};
     </select>
 
     <update id="updateFileTime" parameterType="com.spring.server.cloud.dto.FileManager">
@@ -27,14 +27,17 @@
         WHERE ID = #{roomId} AND fileName = #{oldFileName} AND Extension = #{oldExtension}
     </update>
 
-    <delete id="deleteFile" parameterType="com.spring.server.cloud.mapper.CloudDBMapper">
+    <delete id="deleteFile" parameterType="com.spring.server.cloud.dto.FileManager">
         DELETE FROM file WHERE ID = #{roomId}
-                          AND fileName = #{fileName}
-                          AND FileSize = #{fileLength},
-                          AND Time = #{lastWriteTime}
+                          AND fileName = #{saveFileName}
+
     </delete>
 
-    <select id="returnFileList" parameterType="com.spring.server.cloud.dto.FileManager">
+    <select id="checkExistFileList" parameterType="com.spring.server.cloud.dto.FileManager" resultType="String">
+        SELECT FileName FROM file WHERE ID = #{roomId} AND FileName = #{saveFileName}
+    </select>
+
+    <select id="returnFileList" parameterType="com.spring.server.cloud.dto.FileManager" resultType="String">
         SELECT * FROM file WHERE file_name
         NOT IN
         <foreach collection="list" item="pid"  open="(" close=")" separator=",">

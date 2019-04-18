@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class RoomController {
@@ -34,6 +35,16 @@ public class RoomController {
     @RequestMapping("/createRoom")
     public @ResponseBody int createRoom(HttpServletRequest request) throws Exception {
         return roomService.createRoom(request);
+    }
+
+    @RequestMapping("/roomEnter")
+    public @ResponseBody boolean roomEnter(HttpServletRequest request) throws Exception {
+        return roomService.roomEnter(request);
+    }
+
+    @RequestMapping("/eachUserRoomList")
+    public @ResponseBody List<Map<String,Object>> eachUserRoomList(HttpServletRequest request) throws Exception {
+        return roomService.eachUserRoomList(request);
     }
 
 

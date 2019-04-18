@@ -19,6 +19,21 @@
         WHERE ID = #{roomId} AND FileName = #{saveFileName};
     </update>
 
+    <update id="fileRename" parameterType="com.spring.server.cloud.dto.FileRename">
+        UPDATE file SET
+          User = #{userId},
+          FileName = #{newFileName},
+          Extension = #{newExtension}
+        WHERE ID = #{roomId} AND fileName = #{oldFileName} AND Extension = #{oldExtension}
+    </update>
+
+    <delete id="deleteFile" parameterType="com.spring.server.cloud.mapper.CloudDBMapper">
+        DELETE FROM file WHERE ID = #{roomId}
+                          AND fileName = #{fileName}
+                          AND FileSize = #{fileLength},
+                          AND Time = #{lastWriteTime}
+    </delete>
+
     <select id="returnFileList" parameterType="com.spring.server.cloud.dto.FileManager">
         SELECT * FROM file WHERE file_name
         NOT IN

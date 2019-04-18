@@ -15,16 +15,19 @@ public class FileUploadController {
     @Autowired
     FileUploadService fileUploadService;
 
-    @RequestMapping("/hello")
-    public String onView() {
-        return "hello";
+    @RequestMapping("/upload")
+    public String upload(MultipartHttpServletRequest request) throws Exception {
+        return fileUploadService.restore(request);
     }
 
-    @RequestMapping("/upload")
+    @RequestMapping("/fileRename")
+    public String fileRename(HttpServletRequest request) throws Exception {
+        return fileUploadService.fileRename(request);
+    }
 
-            //public String upload(HttpServletRequest request) {
-    public String upload(MultipartHttpServletRequest request) {
-        return fileUploadService.restore(request);
+    @RequestMapping("/deleteFile")
+    public String deleteFile(HttpServletRequest request) throws Exception {
+        return fileUploadService.deleteFile(request);
     }
 
     // 미완성

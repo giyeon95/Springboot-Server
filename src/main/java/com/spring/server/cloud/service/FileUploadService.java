@@ -1,6 +1,7 @@
 package com.spring.server.cloud.service;
 
 import com.spring.server.cloud.dto.FileManager;
+import com.spring.server.cloud.dto.FileRename;
 import com.spring.server.cloud.mapper.CloudDBMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,12 +9,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.UUID;
 
 @Service
 public class FileUploadService {
@@ -21,11 +21,12 @@ public class FileUploadService {
     @Autowired
     CloudDBMapper cloudDBMapper;
 
-    private static final String SAVE_PATH = "/Capstone/cloud"; // Server
+
+    private static String SAVE_PATH = "/Capstone/cloud/"; // Server
     //private static final String SAVE_PATH = "/Users/giyeon/testCloud"; // localhost
 
     //public String restore(HttpServletRequest request) {
-    public String restore(MultipartHttpServletRequest request) {
+    public String restore(MultipartHttpServletRequest request) throws Exception{
 
 
         String roomId = request.getParameter("roomId");
@@ -35,8 +36,7 @@ public class FileUploadService {
         Long length = Long.valueOf(request.getParameter("fileLength"));
         String extension = request.getParameter("fileExtension");
 
-
-
+        createFolder(roomId);
 
         /*
         String roomId = "12";
@@ -54,12 +54,61 @@ public class FileUploadService {
         return checkTimeDbUpdate(fileManager, multipartFile);
     }
 
-    private String saveFileName(String extName) {
-        Calendar calendar = Calendar.getInstance();
-        return UUID.randomUUID().toString();
+    public String fileRename(HttpServletRequest request) throws Exception{
+        String newFileName = request.getParameter("newFileName");
+        String newExtension = request.getParameter("newExtension");
+        String oldFileName = request.getParameter("oldFileName");
+        String oldExtension = request.getParameter("oldExtension");
+
+        String roomId = request.getParameter("roomId");
+        String userId = request.getParameter("userId");
+
+        FileRename fileRenameSet = new FileRename(newFileName, newExtension, oldFileName, oldExtension, roomId, userId);
+
+        File file = new File(SAVE_PATH+roomId+"/"+oldFileName);
+        File newFile = new File(SAVE_PATH+roomId+"/"+newFileName);
+        if(file.exists()) {
+            if (file.renameTo(newFile)) {
+                cloudDBMapper.fileRename(fileRenameSet);
+            }
+        }
+        return "success";
     }
 
-   private String checkTimeDbUpdate(FileManager fm, MultipartFile multipartFile) {
+    public String deleteFile(HttpServletRequest request) throws Exception {
+
+        String result;
+        String roomId = request.getParameter("roomId");
+        String saveFileName = request.getParameter("saveFileName");
+        FileManager fileManager = new FileManager(roomId,
+                                                    request.getParameter("userId"),
+                                                    request.getParameter("lastWriteTime"),
+                                                    saveFileName,
+                                                    Long.valueOf(request.getParameter("fileLength")),
+                                                    request.getParameter("fileExtension"));
+
+        int num = cloudDBMapper.deleteFile(fileManager);
+
+        if(num == 0) {
+            result = "사용자에게 존재하는 파일이 최신이 아닙니다."; //새로 다운로드를 할것인지 요청 그리고 새로다운로드를 안받고 지울것인지 물어봐서 지우면 그때 진짜 삭제
+        } else {
+            File file = new File(SAVE_PATH+roomId+"/"+saveFileName);
+            file.delete();
+            result = "success";
+        }
+
+        return result;
+    }
+
+    private void createFolder(String roomId) {
+        File file = new File(SAVE_PATH+roomId);
+        if(!file.exists()) file.mkdir();
+
+        SAVE_PATH = SAVE_PATH+roomId;
+
+    }
+
+    private String checkTimeDbUpdate(FileManager fm, MultipartFile multipartFile) {
        String result = "";
 
        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

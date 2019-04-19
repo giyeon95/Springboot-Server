@@ -5,20 +5,23 @@ import com.spring.server.cloud.dto.FileManager;
 import com.spring.server.cloud.dto.FileNameTime;
 import com.spring.server.cloud.dto.FileRename;
 import com.spring.server.cloud.mapper.CloudDBMapper;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -31,7 +34,8 @@ public class FileUploadService {
     CloudDBMapper cloudDBMapper;
 
 
-    private static String SAVE_PATH = "/Capstone/cloud/"; // Server
+    private static final String SAVE_PATH = "/Capstone/cloud/";// Server
+    private static final String SAVE_ZIP_PATH = "/Capstone/.cloud/";
     //private static final String SAVE_PATH = "/Users/giyeon/testCloud"; // localhost
 
     //public String restore(HttpServletRequest request) {
@@ -194,12 +198,82 @@ public class FileUploadService {
         return result;
     }
 
+    public String downloadList(HttpServletRequest request) {
+    //public ResponseEntity<Resource> downloadList(HttpServletRequest request) {
+
+        StringBuffer json = Common.getInstance().createJson(request);
+        JSONParser parser = new JSONParser();
+        List<File> files = new ArrayList<File>();
+
+        File file;
+        String filePath;
+        try {
+            JSONObject jsonObject = (JSONObject)parser.parse(json.toString());
+            String roomId = jsonObject.get("roomId").toString();
+            String userId = jsonObject.get("userId").toString();
+
+            JSONArray jsonArray = (JSONArray)jsonObject.get("uploadList");
+
+           for(int i = 0 ; i < jsonArray.size() ; i++) {
+               filePath = SAVE_PATH+roomId+"/"+jsonArray.get(i).toString();
+
+               file = new File(filePath);
+               if(file.exists()) files.add(file);
+           }
+
+           String zipFileName = SAVE_ZIP_PATH+roomId+userId+".zip";
+
+           File zippedFile = new File(zipFileName);
+            ZipArchiveOutputStream out = new ZipArchiveOutputStream(
+                    new FileOutputStream(zippedFile));
+
+            makeZip(files, out);
+
+        } catch (ParseException e) {
+            logger.error("ParseException : "+e);
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            logger.error("FileNotFound : "+e);
+            e.printStackTrace();
+        } catch (Exception e) {
+            logger.error("Exception : "+e);
+            e.printStackTrace();
+        }
+        return "StringTest";
+    }
+
+    private void makeZip(List<File> files, ZipArchiveOutputStream out) throws Exception {
+        byte[] buf = new byte[8 * 1024];
+        out.setEncoding("UTF-8");
+        FileInputStream fis = null;
+        ZipArchiveEntry ze;
+
+        int length;
+
+        if(files.size() > 0) {
+            for (int i = 0; i < files.size(); i++) {
+
+                ze = new ZipArchiveEntry(files.get(i).getName());
+                out.putArchiveEntry(ze);
+                fis = new FileInputStream(files.get(i));
+                while ((length = fis.read(buf, 0, buf.length)) >= 0) {
+                    out.write(buf, 0, length);
+                }
+            }
+            fis.close();
+            out.closeArchiveEntry();
+        }
+        out.close();
+    }
+
     private void createFolder(String roomId) {
         File file = new File(SAVE_PATH+roomId);
         logger.info("FileUploadService CreateFolder: "+SAVE_PATH+roomId);
         if(!file.exists()) file.mkdir();
 
     }
+
+
 
     private int checkDate(String localDate, Object dbDate) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

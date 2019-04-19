@@ -2,6 +2,8 @@ package com.spring.server.cloud.controller;
 
 import com.spring.server.cloud.service.FileUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -38,8 +40,13 @@ public class FileUploadController {
 
     // 미완성
     @RequestMapping("/downloadList")
-    public @ResponseBody String downloadList() {
-        return "STring!";
+    public @ResponseBody String downloadList(HttpServletRequest request) {
+    //public @ResponseBody ResponseEntity<Resource> downloadList(HttpServletRequest request) {
+
+        //fileUploadService.downloadList(request);
+        return fileUploadService.downloadList(request);
+        //return fileUploadService.downloadList();
+        //return fileUploadService.downloadList(request);
     }
 
 }

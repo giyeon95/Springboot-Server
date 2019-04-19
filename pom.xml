@@ -76,6 +76,13 @@
             <version>1.4</version>
         </dependency>
 
+        <!-- make zip file -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.18</version>
+        </dependency>
+
 
         <!--Loger -->
         <dependency>

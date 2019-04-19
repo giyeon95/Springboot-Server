@@ -212,6 +212,9 @@ public class FileUploadService {
             }
 
 
+            File file = new File(SAVE_ZIP_PATH);
+
+
             JSONObject sendObject = new JSONObject();
             sendObject.put("uploadList",notExistFileList);
             sendObject.put("downloadList",updateNeedFileList);
@@ -233,7 +236,6 @@ public class FileUploadService {
         return result;
     }
 
-    //public String downloadList(HttpServletRequest request) {
     public Resource downloadList(HttpServletRequest request) {
 
 
@@ -282,6 +284,61 @@ public class FileUploadService {
 
         //return callDownloadFile(SAVE_PATH+"cloud/aa1/이종혁.txt");
         return callDownloadFile(zipFileName);
+    }
+
+    public String resultResponeReturnDateTime(HttpServletRequest request) throws Exception {
+        StringBuffer json = Common.getInstance().createJson(request);
+        JSONParser parser = new JSONParser();
+        List<String> resultList = new ArrayList<String>();
+        String returnJSON = "";
+
+        try {
+            JSONObject jsonObject = (JSONObject)parser.parse(json.toString());
+            String roomId = jsonObject.get("roomId").toString();
+            String userId = jsonObject.get("userId").toString();
+            String result = jsonObject.get("result").toString();
+
+            if(result.equals("true")) {
+                File file = new File(SAVE_ZIP_PATH+roomId+userId+".zip");
+                if(file.exists()) file.delete();
+            }
+
+            JSONArray jsonArray = (JSONArray)jsonObject.get("uploadList");
+            for(int i = 0 ; i < jsonArray.size() ; i++) {
+                resultList.add(jsonArray.get(i).toString());
+            }
+
+            HashMap<String, Object> mapParam = new HashMap<String, Object>();
+            mapParam.put("roomId",roomId);
+            mapParam.put("list",resultList);
+
+            List<Map<String, Object>> list = cloudDBMapper.returnDBDateTime(mapParam);
+
+
+            JSONObject jsonObj = new JSONObject();
+
+            if(!list.isEmpty()) {
+                int i;
+                JSONObject itemObj;
+                for(i = 0 ; i< list.size() ; i++) {
+
+                    itemObj = new JSONObject();
+
+                    itemObj.put("FileName",list.get(i).get("FileName").toString());
+
+                    itemObj.put("Time", cloudDBMapper.checkFileTime(roomId, list.get(i).get("FileName").toString()));
+
+                    jsonObj.put(String.valueOf(i),itemObj);
+
+                }
+                jsonObj.put("length", i);
+            }
+            returnJSON = jsonObj.toJSONString();
+
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return returnJSON;
     }
 
     /**DEBUG TEST JSON**/

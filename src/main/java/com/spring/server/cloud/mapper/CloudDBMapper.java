@@ -1,10 +1,8 @@
 package com.spring.server.cloud.mapper;
 
 import com.spring.server.cloud.dto.FileManager;
-import com.spring.server.cloud.dto.FileNameTime;
 import com.spring.server.cloud.dto.FileRename;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,4 +26,6 @@ public interface CloudDBMapper {
     public int checkDBCount(String roomId) throws Exception;
 
     public List<Map<String, Object>> getUserDownloadList(Map<String, Object> map) throws Exception;
+
+    public List<Map<String, Object>> returnDBDateTime(Map<String, Object> map) throws Exception;
 }

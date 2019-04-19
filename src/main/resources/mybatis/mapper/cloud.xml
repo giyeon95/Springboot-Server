@@ -57,4 +57,13 @@
 
     </select>
 
+    <select id="returnDBDateTime" parameterType="map" resultType="map">
+        SELECT FileName FROM file WHERE FileName
+        IN
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        AND ID = #{roomId}
+    </select>
+
 </mapper>

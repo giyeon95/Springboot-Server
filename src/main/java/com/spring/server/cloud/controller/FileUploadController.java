@@ -76,4 +76,8 @@ public class FileUploadController {
                 .body(resource);
     }
 
+    @RequestMapping("/resultResponeReturnDateTime")
+    public @ResponseBody String resultResponeReturnDateTime(HttpServletRequest request) throws Exception {
+        return fileUploadService.resultResponeReturnDateTime(request);
+    }
 }

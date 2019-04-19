@@ -37,12 +37,21 @@
         SELECT FileName FROM file WHERE ID = #{roomId} AND FileName = #{saveFileName}
     </select>
 
-    <select id="returnFileList" parameterType="com.spring.server.cloud.dto.FileManager" resultType="String">
-        SELECT * FROM file WHERE file_name
+    <select id="nullGetUserFolder" parameterType="String" resultType="Map">
+        SELECT FileName FROM file WHERE ID= #{roomId}
+    </select>
+
+    <select id="checkDBCount" parameterType="String" resultType="int">
+        SELECT COUNT(*) AS count FROM file WHERE ID = #{roomId}
+    </select>
+
+    <select id="getUserDownloadList" parameterType="map" resultType="map">
+        SELECT FileName FROM file WHERE FileName
         NOT IN
-        <foreach collection="list" item="pid"  open="(" close=")" separator=",">
-          #{pid}
+        <foreach collection="list" item="item"  open="(" close=")" separator=",">
+          #{item}
         </foreach>
+        AND ID = #{roomId}
         <!--FILE 문 조회문 DB  SELECT * FROM file_tb WHERE filename Not IN ( #{saveName} )-->
         <!--  local folder에 있는 filename은 한번에 보내줄텐데 이를 한번에 검색하고 제외하여 조회할 수 있는가?-->
 

@@ -1,8 +1,13 @@
 package com.spring.server.cloud.controller;
 
 import com.spring.server.cloud.service.FileUploadService;
+import org.apache.commons.io.IOExceptionWithCause;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,10 +15,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 
 @Controller
 public class FileUploadController {
+
+    private static final Log logger = LogFactory.getLog(FileUploadController.class );
 
     @Autowired
     FileUploadService fileUploadService;
@@ -38,15 +46,34 @@ public class FileUploadController {
         return fileUploadService.firstLoginCheckFileList(request);
     }
 
+    @RequestMapping("/debugTest")
+    public @ResponseBody String debugTest(HttpServletRequest request) throws Exception {
+        fileUploadService.debugTest(request);
+        return "debugTestPage";
+    }
+
     // 미완성
     @RequestMapping("/downloadList")
-    public @ResponseBody String downloadList(HttpServletRequest request) {
-    //public @ResponseBody ResponseEntity<Resource> downloadList(HttpServletRequest request) {
+    public @ResponseBody ResponseEntity<Resource> downloadList(HttpServletRequest request) throws Exception{
 
-        //fileUploadService.downloadList(request);
-        return fileUploadService.downloadList(request);
-        //return fileUploadService.downloadList();
-        //return fileUploadService.downloadList(request);
+        Resource resource = fileUploadService.downloadList(request);
+        String contentType = null;
+
+        try {
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        } catch (IOException ex) {
+            logger.info(ex);
+        }
+
+        if(contentType == null) {
+            //contentType = "text";
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"" + resource.getFilename())
+                .body(resource);
     }
 
 }

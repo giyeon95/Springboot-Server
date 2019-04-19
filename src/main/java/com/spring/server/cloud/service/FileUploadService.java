@@ -15,13 +15,18 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.xml.transform.ResourceSource;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -29,7 +34,7 @@ import java.util.*;
 @Service
 public class FileUploadService {
 
-    public static final Log logger = LogFactory.getLog(FileUploadService.class );
+    private static final Log logger = LogFactory.getLog(FileUploadService.class );
     @Autowired
     CloudDBMapper cloudDBMapper;
 
@@ -116,13 +121,16 @@ public class FileUploadService {
     public String firstLoginCheckFileList(HttpServletRequest request) throws Exception {
 
         StringBuffer json = Common.getInstance().createJson(request);
-        ArrayList<String> notExistFileList = new ArrayList<String>();
-        ArrayList<String> updateNeedFileList = new ArrayList<String>();
-        ArrayList<String> latestFile = new ArrayList<String>();
+        List<String> notExistFileList = new ArrayList<String>();
+        List<String> updateNeedFileList = new ArrayList<String>();
+        List<String> latestFile = new ArrayList<String>();
+        List<String> allGetFile = new ArrayList<String>();
 
         String result ="";
         String roomId;
         String userId;
+        int dbCount;
+        int localCount;
 
         try {
             JSONParser parser = new JSONParser();
@@ -137,10 +145,11 @@ public class FileUploadService {
             FileManager fileManager;
             String fileName;
             String localDate;
-            //List<FileNameTime> list;
-            //HashMap<String, String> hashMap = new HashMap<String, String>();
 
-            for(int i=0 ; i< Integer.parseInt(jsonObject.get("length").toString()) ; i++) {
+            dbCount = cloudDBMapper.checkDBCount(roomId);
+            localCount = Integer.parseInt(jsonObject.get("length").toString());
+
+            for(int i=0 ; i < localCount; i++) {
                  fileObject = (JSONObject)jsonObjectFiles.get(String.valueOf(i));
 
 
@@ -154,11 +163,12 @@ public class FileUploadService {
                                             Long.valueOf(fileObject.get("fileLength").toString()),
                                             fileObject.get("fileExtension").toString());
 
+                allGetFile.add(fileName);
+
                 String dbFileName = cloudDBMapper.checkExistFileList(fileManager);
 
                 if(dbFileName == null) {
                     notExistFileList.add(fileName);
-                    logger.info("여기로빠짐");
                 } else {
                     String dbTime = cloudDBMapper.checkFileTime(roomId,fileName);
                     int tmp = checkDate(localDate, dbTime);
@@ -174,8 +184,33 @@ public class FileUploadService {
                         latestFile.add(fileName);
                     }
                 }
+            }
+
+            if(dbCount > localCount) {
+                if(allGetFile.size()>0) {
+
+                    HashMap<String, Object> mapParam = new HashMap<String, Object>();
+                    mapParam.put("roomId",roomId);
+                    mapParam.put("list",allGetFile);
+
+                    List<Map<String, Object>> list = cloudDBMapper.getUserDownloadList(mapParam);
+
+                    if(!list.isEmpty()) {
+                        list.forEach((item) -> {
+                            updateNeedFileList.add(item.get("FileName").toString());
+                        });
+                    }
+                } else { // case 0
+                    List<Map<String, Object>> list = cloudDBMapper.nullGetUserFolder(roomId);
+                    if(!list.isEmpty()) {
+                        list.forEach((item) -> {
+                            updateNeedFileList.add(item.get("FileName").toString());
+                        });
+                    }
+                }
 
             }
+
 
             JSONObject sendObject = new JSONObject();
             sendObject.put("uploadList",notExistFileList);
@@ -198,21 +233,26 @@ public class FileUploadService {
         return result;
     }
 
-    public String downloadList(HttpServletRequest request) {
-    //public ResponseEntity<Resource> downloadList(HttpServletRequest request) {
+    //public String downloadList(HttpServletRequest request) {
+    public Resource downloadList(HttpServletRequest request) {
 
+
+        String zipFileName = "";
         StringBuffer json = Common.getInstance().createJson(request);
         JSONParser parser = new JSONParser();
         List<File> files = new ArrayList<File>();
 
         File file;
         String filePath;
+
+
         try {
             JSONObject jsonObject = (JSONObject)parser.parse(json.toString());
             String roomId = jsonObject.get("roomId").toString();
             String userId = jsonObject.get("userId").toString();
 
             JSONArray jsonArray = (JSONArray)jsonObject.get("uploadList");
+
 
            for(int i = 0 ; i < jsonArray.size() ; i++) {
                filePath = SAVE_PATH+roomId+"/"+jsonArray.get(i).toString();
@@ -221,7 +261,7 @@ public class FileUploadService {
                if(file.exists()) files.add(file);
            }
 
-           String zipFileName = SAVE_ZIP_PATH+roomId+userId+".zip";
+           zipFileName = SAVE_ZIP_PATH+roomId+userId+".zip";
 
            File zippedFile = new File(zipFileName);
             ZipArchiveOutputStream out = new ZipArchiveOutputStream(
@@ -239,7 +279,68 @@ public class FileUploadService {
             logger.error("Exception : "+e);
             e.printStackTrace();
         }
-        return "StringTest";
+
+        //return callDownloadFile(SAVE_PATH+"cloud/aa1/이종혁.txt");
+        return callDownloadFile(zipFileName);
+    }
+
+    /**DEBUG TEST JSON**/
+    public void debugTest(HttpServletRequest request) throws Exception {
+        String roomId = request.getParameter("roomId");
+        //String parm1 = request.getParameter("file1");
+        //String parm2 = request.getParameter("file2");
+        //String parm3 = request.getParameter("file3");
+
+
+        List<String> arr = new ArrayList<String>();
+
+        //arr.add(parm1);
+        //arr.add(parm2);
+        //arr.add(parm3);
+
+        HashMap<String, Object> mapParam = new HashMap<String, Object>();
+        mapParam.put("roomId",roomId);
+        mapParam.put("list",arr);
+
+
+        int dbCount = cloudDBMapper.checkDBCount(roomId);
+
+        if(arr.size() > 0) {
+            List<Map<String, Object>> list = cloudDBMapper.getUserDownloadList(mapParam);
+            if(!list.isEmpty()) {
+                list.forEach((item) -> {
+                    System.out.println(item.get("FileName"));
+                });
+            }
+        } else { // case 0
+            List<Map<String, Object>> list = cloudDBMapper.nullGetUserFolder(roomId);
+            if (!list.isEmpty()) {
+                list.forEach((item) -> {
+                    System.out.println(item.get("FileName"));
+                    //updateNeedFileList.add(item.toString());
+                });
+            }
+
+        }
+
+    }
+
+    private Resource callDownloadFile(String filePath) {
+
+        try {
+            Path path = Paths.get(filePath).toAbsolutePath().normalize();
+            Resource resource = new UrlResource(path.toUri());
+            if(resource.exists()) {
+                return resource;
+            } else {
+                throw new Exception ("File not found : "+filePath);
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return null;
     }
 
     private void makeZip(List<File> files, ZipArchiveOutputStream out) throws Exception {
@@ -272,8 +373,6 @@ public class FileUploadService {
         if(!file.exists()) file.mkdir();
 
     }
-
-
 
     private int checkDate(String localDate, Object dbDate) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

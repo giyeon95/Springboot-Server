@@ -4,6 +4,7 @@ import com.spring.server.cloud.dto.FileManager;
 import com.spring.server.cloud.dto.FileNameTime;
 import com.spring.server.cloud.dto.FileRename;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,4 +22,10 @@ public interface CloudDBMapper {
     public int deleteFile(FileManager fileManager) throws Exception;
 
     public String checkExistFileList(FileManager fileManager) throws Exception;
+
+    public List<Map<String, Object>> nullGetUserFolder(String roomId) throws Exception;
+
+    public int checkDBCount(String roomId) throws Exception;
+
+    public List<Map<String, Object>> getUserDownloadList(Map<String, Object> map) throws Exception;
 }

@@ -38,7 +38,7 @@ public class RoomController {
     }
 
     @RequestMapping("/roomEnter")
-    public @ResponseBody boolean roomEnter(HttpServletRequest request) throws Exception {
+    public @ResponseBody int roomEnter(HttpServletRequest request) throws Exception {
         return roomService.roomEnter(request);
     }
 

@@ -29,6 +29,10 @@
         SELECT COUNT(*) FROM room WHERE ID = #{roomId} AND PW = #{roomPw}
     </select>
 
+    <select id="roomEnterOneMoreCheck" parameterType="String" resultType="int">
+        SELECT COUNT(*) FROM roomUser WHERE User = #{userId} AND ID = #{roomId}
+    </select>
+
     <select id="eachUserRoomList" parameterType="String" resultType="Map">
         SELECT ID AS roomId,
           (

@@ -28,4 +28,14 @@ public interface CloudDBMapper {
     public List<Map<String, Object>> getUserDownloadList(Map<String, Object> map) throws Exception;
 
     public List<Map<String, Object>> returnDBDateTime(Map<String, Object> map) throws Exception;
+
+    public List<Map<String, Object>> deleteList(String roomId, String fileName) throws Exception;
+
+    public void addDeleteFile(String roomId, String fileName, String fileSize, String time) throws Exception;
+
+    public String isDeleteFile(String roomId, String fileName) throws Exception;
+
+    public void updateDeleteFile(String fileSize, String time) throws Exception;
+
+    public void deleteDeleteFile(String roomId, String fileName) throws Exception;
 }

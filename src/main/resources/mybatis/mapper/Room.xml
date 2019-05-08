@@ -45,5 +45,8 @@
         FROM roomUser WHERE User = #{userId} AND ID LIKE #{word};
     </select>
 
+    <select id="roomEnterOneMoreCheck" parameterType="String" resultType="int">
+         SELECT COUNT(*) FROM roomUser WHERE User = #{userId} AND ID = #{roomId}
+     </select>
 
 </mapper>

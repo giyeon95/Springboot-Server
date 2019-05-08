@@ -63,7 +63,6 @@ public class RoomService {
         } else {
             result = 0;
         }
-
         return result;
     }
 

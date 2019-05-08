@@ -137,6 +137,7 @@ public class FileUploadService {
         List<String> notExistFileList = new ArrayList<String>();
         List<String> updateNeedFileList = new ArrayList<String>();
         List<String> latestFile = new ArrayList<String>();
+        
         List<String> deleteFileList = new ArrayList<String>();
         List<String> allGetFile = new ArrayList<String>();
 

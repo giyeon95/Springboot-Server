@@ -48,13 +48,21 @@ public class RoomService {
         return roomDBMapper.createRoom(roomId, roomPw,userId);
     }
 
-    public boolean roomEnter(HttpServletRequest request) throws Exception {
-        boolean result = false;
-
+    public int roomEnter(HttpServletRequest request) throws Exception {
+        int result;
+        String userId = request.getParameter("userID");
         String roomId = request.getParameter("roomID");
         String roomPw = request.getParameter("PW");
 
-        if(roomDBMapper.roomEnter(roomId, roomPw) == 1) result = true;
+        if(roomDBMapper.roomEnter(roomId, roomPw) == 1) {
+            if(roomDBMapper.roomEnterOneMoreCheck(userId, roomId) ==0) {
+                result = -1;
+            } else {
+                result =1;
+            }
+        } else {
+            result = 0;
+        }
         return result;
     }
 

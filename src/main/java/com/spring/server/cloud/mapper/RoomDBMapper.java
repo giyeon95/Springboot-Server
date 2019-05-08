@@ -18,5 +18,5 @@ public interface RoomDBMapper {
 
     public List<Map<String, Object>> eachUserRoomList(String userId, String word) throws Exception;
 
-
+    public int roomEnterOneMoreCheck(String userId, String roomId);
 }

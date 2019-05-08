@@ -66,25 +66,4 @@
         AND ID = #{roomId}
     </select>
 
-    <select id="deleteList" parameterType="String" resultType="map">
-        SELECT ID AS roomId, FileName AS fileName, FileSize AS fileSize
-                FROM file WHERE ID = #{roomId} AND FileName = #{fileName}
-    </select>
-
-    <insert id="addDeleteFile" parameterType="String">
-        INSERT INTO file_delete VALUES (#{roomId}, #{fileName}, #{fileSize}, #{time})
-    </insert>
-
-    <select id="isDeleteFile" parameterType="String" resultType="String">
-        SELECT Time FROM file_delete
-        WHERE ID = #{roomId} AND fileName = #{fileName}
-    </select>
-
-    <update id="updateDeleteFile" parameterType="String">
-        UPDATE file_delete SET FileSize = #{fileSize} AND Time = #{time}
-    </update>
-
-    <delete id="deleteDeleteFile" parameterType="String">
-        DELETE FROM file_delete WHERE ID= #{roomId} AND FileName = #{fileName}
-    </delete>
 </mapper>

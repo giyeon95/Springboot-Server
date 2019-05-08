@@ -16,8 +16,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 
 @Controller
@@ -49,9 +47,9 @@ public class FileUploadController {
     }
 
     @RequestMapping("/debugTest")
-    public @ResponseBody List<Map<String,Object>> debugTest(HttpServletRequest request) throws Exception {
-
-        return fileUploadService.debugTest(request);
+    public @ResponseBody String debugTest(HttpServletRequest request) throws Exception {
+        fileUploadService.debugTest(request);
+        return "debugTestPage";
     }
 
     // 미완성

@@ -23,7 +23,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.xml.transform.ResourceSource;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.swing.*;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
@@ -106,23 +105,11 @@ public class FileUploadService {
                                                     0L,
                                                     request.getParameter("fileExtension"));
 
-        List<Map<String, Object>> deleteMap = cloudDBMapper.deleteList(roomId, saveFileName);
+        int num = cloudDBMapper.deleteFile(fileManager);
 
-        if(deleteMap.isEmpty()) {
+        if(num == 0) {
             result = "서버에 없는 파일"; //새로 다운로드를 할것인지 요청 그리고 새로다운로드를 안받고 지울것인지 물어봐서 지우면 그때 진짜 삭제
-
         } else {
-            cloudDBMapper.deleteFile(fileManager);
-            String dFileSize = deleteMap.get(0).get("fileSize").toString();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            long time = System.currentTimeMillis();
-            String dTime = sdf.format(new Date(time));
-
-            String isDeleteFile = cloudDBMapper.isDeleteFile(roomId, saveFileName);
-
-            if(isDeleteFile == null) cloudDBMapper.addDeleteFile(roomId, saveFileName, dFileSize, dTime);
-            else cloudDBMapper.updateDeleteFile(dFileSize, dTime);
-
             File file = new File(SAVE_PATH+roomId+"/"+saveFileName);
             file.delete();
             result = "success";
@@ -137,7 +124,6 @@ public class FileUploadService {
         List<String> notExistFileList = new ArrayList<String>();
         List<String> updateNeedFileList = new ArrayList<String>();
         List<String> latestFile = new ArrayList<String>();
-        List<String> deleteFileList = new ArrayList<String>();
         List<String> allGetFile = new ArrayList<String>();
 
         String result ="";
@@ -180,19 +166,9 @@ public class FileUploadService {
                 allGetFile.add(fileName);
 
                 String dbFileName = cloudDBMapper.checkExistFileList(fileManager);
-                String deleteFileTime = cloudDBMapper.isDeleteFile(roomId, fileName);
+
                 if(dbFileName == null) {
-                    if(deleteFileTime == null) {
-                        notExistFileList.add(fileName);
-                    } else {
-                        int tmp = checkDate(localDate, deleteFileTime);
-                        if(tmp <=0) /** 파일최종 수정 시간이 삭제 테이블보다 최신일때 혹은 같을때**/ {
-                            notExistFileList.add(fileName);
-                            cloudDBMapper.deleteDeleteFile(roomId, fileName); // 원래있던 삭제테이블에 존재하는 거 삭제함 << 사람들 자동 업데이트 혹은 지운사람들 새로 올라옴
-                        } else { /** 파일 최종수정시간이 같거나 삭제테이블이 더 최신일때 **/
-                            deleteFileList.add(fileName);
-                        }
-                    }
+                    notExistFileList.add(fileName);
                 } else {
                     String dbTime = cloudDBMapper.checkFileTime(roomId,fileName);
                     int tmp = checkDate(localDate, dbTime);
@@ -242,13 +218,10 @@ public class FileUploadService {
             JSONObject sendObject = new JSONObject();
             sendObject.put("uploadList",notExistFileList);
             sendObject.put("downloadList",updateNeedFileList);
-            sendObject.put("deleteList",deleteFileList);
             sendObject.put("latestFile",latestFile);
-
 
             sendObject.put("uploadSize",notExistFileList.size());
             sendObject.put("downloadSize",updateNeedFileList.size());
-            sendObject.put("deleteListSize",deleteFileList.size());
 
 
             result = sendObject.toJSONString();
@@ -369,22 +342,44 @@ public class FileUploadService {
     }
 
     /**DEBUG TEST JSON**/
-    public List<Map<String, Object>> debugTest(HttpServletRequest request) throws Exception {
+    public void debugTest(HttpServletRequest request) throws Exception {
         String roomId = request.getParameter("roomId");
-        String saveFileName = request.getParameter("fileName");
-
-        List<Map<String, Object>> deleteMap = cloudDBMapper.deleteList(roomId, saveFileName);
-
-        if(deleteMap.isEmpty()) {
-            System.out.println("isIMPTY!");
-        } else {
+        //String parm1 = request.getParameter("file1");
+        //String parm2 = request.getParameter("file2");
+        //String parm3 = request.getParameter("file3");
 
 
+        List<String> arr = new ArrayList<String>();
+
+        //arr.add(parm1);
+        //arr.add(parm2);
+        //arr.add(parm3);
+
+        HashMap<String, Object> mapParam = new HashMap<String, Object>();
+        mapParam.put("roomId",roomId);
+        mapParam.put("list",arr);
 
 
+        int dbCount = cloudDBMapper.checkDBCount(roomId);
+
+        if(arr.size() > 0) {
+            List<Map<String, Object>> list = cloudDBMapper.getUserDownloadList(mapParam);
+            if(!list.isEmpty()) {
+                list.forEach((item) -> {
+                    System.out.println(item.get("FileName"));
+                });
+            }
+        } else { // case 0
+            List<Map<String, Object>> list = cloudDBMapper.nullGetUserFolder(roomId);
+            if (!list.isEmpty()) {
+                list.forEach((item) -> {
+                    System.out.println(item.get("FileName"));
+                    //updateNeedFileList.add(item.toString());
+                });
+            }
 
         }
-        return deleteMap;
+
     }
 
     private Resource callDownloadFile(String filePath) {

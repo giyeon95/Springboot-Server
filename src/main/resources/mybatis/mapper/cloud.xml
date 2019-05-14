@@ -66,6 +66,10 @@
         AND ID = #{roomId}
     </select>
 
+    <select id="uploadCheck" parameterType="String" resultType="int">
+        SELECT COUNT(*) FROM file WHERE ID = #{roomId} AND FileName = #{fileName} AND Time = #{time}
+    </select>
+
     <select id="deleteList" parameterType="String" resultType="map">
         SELECT ID AS roomId, FileName AS fileName, FileSize AS fileSize
                 FROM file WHERE ID = #{roomId} AND FileName = #{fileName}

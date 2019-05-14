@@ -388,6 +388,22 @@ public class FileUploadService {
         return deleteMap;
     }
 
+    public boolean uploadCheck(HttpServletRequest request) throws Exception {
+        StringBuffer json = Common.getInstance().createJson(request);
+        JSONParser parser = new JSONParser();
+        boolean result = false;
+
+        JSONObject jsonObject = (JSONObject)parser.parse(json.toString());
+        String roomId = jsonObject.get("roomId").toString();
+        String fileName = jsonObject.get("fileName").toString();
+        String time = jsonObject.get("fileLastWriteTime").toString();
+
+        if(cloudDBMapper.uploadCheck(roomId, fileName, time) == 0) {
+            result = true;
+        }
+        return result;
+    }
+
     private Resource callDownloadFile(String filePath) {
 
         try {

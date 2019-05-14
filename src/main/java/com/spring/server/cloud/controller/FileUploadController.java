@@ -68,7 +68,6 @@ public class FileUploadController {
         }
 
         if(contentType == null) {
-            //contentType = "text";
             contentType = "application/octet-stream";
         }
 
@@ -81,5 +80,10 @@ public class FileUploadController {
     @RequestMapping("/resultResponeReturnDateTime")
     public @ResponseBody String resultResponeReturnDateTime(HttpServletRequest request) throws Exception {
         return fileUploadService.resultResponeReturnDateTime(request);
+    }
+
+    @RequestMapping("/uploadCheck")
+    public @ResponseBody Boolean uploadCheck(HttpServletRequest request) throws Exception {
+        return fileUploadService.uploadCheck(request);
     }
 }

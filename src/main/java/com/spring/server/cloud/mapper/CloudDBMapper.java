@@ -38,4 +38,6 @@ public interface CloudDBMapper {
     public void updateDeleteFile(String fileSize, String time) throws Exception;
 
     public void deleteDeleteFile(String roomId, String fileName) throws Exception;
+
+    public int uploadCheck(String roomId, String fileName, String time) throws Exception;
 }

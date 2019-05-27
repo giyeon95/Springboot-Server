@@ -485,9 +485,12 @@ public class FileUploadService {
 
 
             if(dbDate == null) {
-                cloudDBMapper.restoreDatabase(fm);
-                writeFile(multipartFile, fm.getRoomId(), fm.getSaveFileName());
-                result = "addFileSuccess";
+                if(!(fm.getSaveFileName() == null || fm.getSaveFileName().equals("Thumbs.db"))) {
+
+                    cloudDBMapper.restoreDatabase(fm);
+                    writeFile(multipartFile, fm.getRoomId(), fm.getSaveFileName());
+                    result = "addFileSuccess";
+                }
             } else {
 
                 originalDate = sdf.parse(dbDate);

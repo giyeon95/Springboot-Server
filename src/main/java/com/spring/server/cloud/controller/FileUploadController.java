@@ -57,10 +57,37 @@ public class FileUploadController {
     // 미완성
     @RequestMapping("/downloadList")
     public @ResponseBody ResponseEntity<Resource> downloadList(HttpServletRequest request) throws Exception{
-
         Resource resource = fileUploadService.downloadList(request);
-        String contentType = null;
 
+        return responseEntity(request, resource);
+    }
+
+    @RequestMapping("/resultResponeReturnDateTime")
+    public @ResponseBody String resultResponeReturnDateTime(HttpServletRequest request) throws Exception {
+        return fileUploadService.resultResponeReturnDateTime(request);
+    }
+
+    @RequestMapping("/uploadCheck")
+    public @ResponseBody Boolean uploadCheck(HttpServletRequest request) throws Exception {
+        return fileUploadService.uploadCheck(request);
+    }
+
+    @RequestMapping("/fileChangeCheck")
+    public @ResponseBody boolean fileChangeCheck(HttpServletRequest request) throws Exception {
+        return fileUploadService.fileChangeCheck(request);
+    }
+
+    @RequestMapping("/eachDownload")
+    public @ResponseBody ResponseEntity<Resource> eachDownload(HttpServletRequest request) throws Exception{
+
+        Resource resource = fileUploadService.eachDownload(request);
+
+
+       return responseEntity(request, resource);
+    }
+
+    private ResponseEntity<Resource> responseEntity(HttpServletRequest request, Resource resource) throws Exception{
+        String contentType = null;
         try {
             contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
         } catch (IOException ex) {
@@ -75,15 +102,5 @@ public class FileUploadController {
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"" + resource.getFilename())
                 .body(resource);
-    }
-
-    @RequestMapping("/resultResponeReturnDateTime")
-    public @ResponseBody String resultResponeReturnDateTime(HttpServletRequest request) throws Exception {
-        return fileUploadService.resultResponeReturnDateTime(request);
-    }
-
-    @RequestMapping("/uploadCheck")
-    public @ResponseBody Boolean uploadCheck(HttpServletRequest request) throws Exception {
-        return fileUploadService.uploadCheck(request);
     }
 }

@@ -74,6 +74,8 @@ public class FileUploadService {
     }
 
     public String fileRename(HttpServletRequest request) throws Exception{
+        String result = "";
+
         String newFileName = request.getParameter("newFileName");
         String newExtension = request.getParameter("newExtension");
         String oldFileName = request.getParameter("oldFileName");
@@ -90,8 +92,11 @@ public class FileUploadService {
             if (file.renameTo(newFile)) {
                 cloudDBMapper.fileRename(fileRenameSet);
             }
+            result= "success";
+        } else {
+            result = "fail";
         }
-        return "success";
+        return result;
     }
 
     public String deleteFile(HttpServletRequest request) throws Exception {
@@ -264,8 +269,9 @@ public class FileUploadService {
         return result;
     }
 
-    public Resource downloadList(HttpServletRequest request) {
 
+
+    public Resource downloadList(HttpServletRequest request) {
 
         String zipFileName = "";
         StringBuffer json = Common.getInstance().createJson(request);
@@ -312,6 +318,39 @@ public class FileUploadService {
 
         //return callDownloadFile(SAVE_PATH+"cloud/aa1/이종혁.txt");
         return callDownloadFile(zipFileName);
+    }
+
+    public Resource eachDownload(HttpServletRequest request) throws Exception{
+        StringBuffer json = Common.getInstance().createJson(request);
+        JSONParser parser = new JSONParser();
+
+        File file;
+        String filePath;
+
+        try {
+            JSONObject jsonObject = (JSONObject)parser.parse(json.toString());
+            String roomId = jsonObject.get("roomId").toString();
+            String userId = jsonObject.get("userId").toString();
+
+            JSONArray jsonArray = (JSONArray)jsonObject.get("uploadList");
+
+
+            for(int i = 0 ; i < jsonArray.size() ; i++) {
+                filePath = SAVE_PATH+roomId+"/"+jsonArray.get(i).toString();
+
+                file = new File(filePath);
+                if(file.exists())  return callDownloadFile(filePath);
+            }
+
+        } catch (ParseException e) {
+            logger.error("ParseException : "+e);
+            e.printStackTrace();
+        } catch (Exception e) {
+            logger.error("Exception : "+e);
+            e.printStackTrace();
+        }
+
+        return callDownloadFile("error!");
     }
 
     public String resultResponeReturnDateTime(HttpServletRequest request) throws Exception {
@@ -404,6 +443,24 @@ public class FileUploadService {
         return result;
     }
 
+    public boolean fileChangeCheck(HttpServletRequest request) throws Exception {
+        boolean result = false;
+
+        StringBuffer json = Common.getInstance().createJson(request);
+        JSONParser parser = new JSONParser();
+
+        JSONObject jsonObject = (JSONObject)parser.parse(json.toString());
+        String roomId = jsonObject.get("roomId").toString();
+        String fileName = jsonObject.get("fileName").toString();
+        String time = jsonObject.get("fileLastWriteTime").toString();
+        String fileSize = jsonObject.get("fileSize").toString();
+        FileManager fm = new FileManager(roomId,"debug",time,fileName,Long.valueOf(fileSize),"debug");
+        if(cloudDBMapper.fileChangeCheck(fm) > 0) {
+            result = true;
+        }
+        return result;
+    }
+
     private Resource callDownloadFile(String filePath) {
 
         try {
@@ -485,11 +542,14 @@ public class FileUploadService {
 
 
             if(dbDate == null) {
-                if(!(fm.getSaveFileName() == null || fm.getSaveFileName().equals("Thumbs.db"))) {
+                if(!(fm.getSaveFileName() == null || fm.getSaveFileName().equals("Thumbs.db") || fm.getSaveFileName().equals(""))) {
 
-                    cloudDBMapper.restoreDatabase(fm);
-                    writeFile(multipartFile, fm.getRoomId(), fm.getSaveFileName());
-                    result = "addFileSuccess";
+                    Date checkDate = sdf.parse("1900-01-01 09:00:00");
+                    if(checkDate.compareTo(newDate) < 0) {
+                        cloudDBMapper.restoreDatabase(fm);
+                        writeFile(multipartFile, fm.getRoomId(), fm.getSaveFileName());
+                        result = "addFileSuccess";
+                    }
                 }
             } else {
 

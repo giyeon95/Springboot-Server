@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.server.db.mapper.DBMapper">
+    <select id="getAll" resultType="com.spring.server.db.dto.User">
+        SELECT * FROM user
+    </select>
+
+    <select id="findByUserId" parameterType="String" resultType="com.spring.server.db.dto.User">
+        SELECT * FROM user WHERE ID = #{id}
+    </select>
+
+    <select id="userLogin" parameterType="String" resultType="com.spring.server.db.dto.User">
+        SELECT * FROM user WHERE ID = #{id} and PW = #{pw}
+    </select>
+
+    <insert id="signUpUser" parameterType="com.spring.server.db.dto.User">
+        INSERT INTO user
+        VALUES(#{id},#{password},#{name},#{email})
+    </insert>
+
+    <insert id="addUserRoom" parameterType="String">
+        INSERT INTO roomUser VALUES (#{roomId}, #{userId});
+    </insert>
+
+    <select id="emailReturn" parameterType="String" resultType="com.spring.server.db.dto.UserEmail">
+        SELECT Name, Email FROM user WHERE ID IN (SELECT User FROM roomUser WHERE ID = #{roomId});
+    </select>
+</mapper>
+
